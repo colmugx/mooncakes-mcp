@@ -1,4 +1,4 @@
 ///|
 fn main {
-  println(@lib.fib(10))
+  println(@server.farewell())
 }

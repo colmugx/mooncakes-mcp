@@ -1,9 +1,6 @@
 {
   "is-main": true,
   "import": [
-    {
-      "path": "username/moonbit_mcp",
-      "alias": "lib"
-    }
+    "colmugx/moonbit_mcp/internal/server"
   ]
 }
