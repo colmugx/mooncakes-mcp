@@ -1,0 +1,10 @@
+{
+  "is-main": false,
+  "import": [
+    "moonbitlang/async",
+    "moonbitlang/async/stdio",
+    "moonbitlang/async/http",
+    "moonbitlang/async/socket",
+    "moonbitlang/async/io"
+  ]
+}

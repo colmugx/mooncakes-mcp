@@ -1,6 +1,0 @@
-{
-  "is-main": true,
-  "import": [
-    "colmugx/moonbit_mcp/internal/server"
-  ]
-}

@@ -1,0 +1,250 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/moonbit_mcp/sdk"
+
+import(
+  "moonbitlang/async/aqueue"
+)
+
+// Values
+pub fn extract_int_from_json(Json, String) -> Int?
+
+pub fn extract_string_from_json(Json, String) -> String?
+
+pub fn json_array(Array[String]) -> String
+
+pub fn json_bool(Bool) -> String
+
+pub fn json_number(Int) -> String
+
+pub fn json_object(Array[(String, String)]) -> String
+
+pub fn json_string(String) -> String
+
+pub fn jsonrpc_error(Int, Int, String) -> String
+
+pub fn jsonrpc_success(Int, String) -> String
+
+pub fn validate_jsonrpc_message(String) -> Result[Unit, MCPError]
+
+// Errors
+pub(all) suberror MCPError {
+  ParseError(String)
+  InvalidRequest(String)
+  MethodNotFound(String)
+  InvalidParams(String)
+  InternalError(String)
+  TransportError(TransportError)
+  ToolError(String)
+}
+pub fn MCPError::message(Self) -> String
+pub fn MCPError::to_error_code(Self) -> Int
+pub impl Eq for MCPError
+pub impl Show for MCPError
+
+pub(all) suberror TransportError {
+  ConnectionClosed
+  ReadError(String)
+  WriteError(String)
+  Timeout
+  InvalidState(String)
+}
+pub impl Eq for TransportError
+pub impl Show for TransportError
+
+// Types and methods
+pub(all) enum AnyTransport {
+  Stdio(StdioTransport)
+  Http(HttpTransport)
+}
+pub fn AnyTransport::close(Self) -> Unit
+pub async fn AnyTransport::receive(Self) -> String? raise TransportError
+pub async fn AnyTransport::send(Self, String) -> Unit raise TransportError
+pub async fn AnyTransport::send_event(Self, event_type~ : String, data~ : String) -> Unit
+pub fn AnyTransport::supports_streaming(Self) -> Bool
+
+pub enum ContentItem {
+  Text(String)
+  Image(String, mime_type~ : String)
+  Resource(String)
+}
+pub impl Eq for ContentItem
+pub impl Show for ContentItem
+
+pub struct GetPromptResult {
+  description : String?
+  messages : Array[PromptMessage]
+}
+pub impl Eq for GetPromptResult
+pub impl Show for GetPromptResult
+
+type HttpPendingRequest
+
+type HttpResponse
+
+pub struct HttpTransport {
+  port : Int
+  endpoint_path : String
+  pending_requests : @aqueue.Queue[HttpPendingRequest]
+  mut current_reply_queue : @aqueue.Queue[HttpResponse]?
+  session_id : String?
+}
+pub fn HttpTransport::close(Self) -> Unit
+pub fn HttpTransport::new(port? : Int, endpoint_path? : String) -> Self
+pub async fn HttpTransport::receive(Self) -> String? raise TransportError
+pub async fn HttpTransport::send(Self, String) -> Unit raise TransportError
+pub fn HttpTransport::send_event(Self, event_type~ : String, data~ : String) -> Unit
+pub async fn HttpTransport::start(Self) -> Unit raise TransportError
+pub fn HttpTransport::supports_streaming(Self) -> Bool
+
+pub struct JsonRpcError {
+  code : Int
+  message : String
+  data : Json?
+}
+pub impl Eq for JsonRpcError
+pub impl Show for JsonRpcError
+
+pub struct JsonRpcRequest {
+  jsonrpc : String
+  id : Int
+  method_name : String
+  params : Json
+}
+pub fn JsonRpcRequest::from_json(Json) -> Result[Self, MCPError]
+pub impl Eq for JsonRpcRequest
+pub impl Show for JsonRpcRequest
+
+pub struct JsonRpcResponse {
+  jsonrpc : String
+  id : Int
+  result : Result[Json, JsonRpcError]
+}
+pub impl Eq for JsonRpcResponse
+pub impl Show for JsonRpcResponse
+
+pub struct MCPServer {
+  name : String
+  version : String
+  registry : ToolRegistry
+}
+pub async fn MCPServer::handle_request(Self, String) -> String
+pub fn MCPServer::new(String, String) -> Self
+pub fn MCPServer::register_tool(Self, String, String, Json, async (Json) -> Result[ToolResult, MCPError]) -> Unit
+pub async fn MCPServer::run(Self, AnyTransport) -> Unit raise TransportError
+
+pub struct Prompt {
+  name : String
+  description : String?
+  arguments : Array[PromptArgument]?
+}
+pub impl Eq for Prompt
+pub impl Show for Prompt
+
+pub struct PromptArgument {
+  name : String
+  description : String?
+  required : Bool?
+}
+pub impl Eq for PromptArgument
+pub impl Show for PromptArgument
+
+pub struct PromptCapabilities {
+  list_changed : Bool
+}
+pub impl Eq for PromptCapabilities
+pub impl Show for PromptCapabilities
+
+type PromptEntry
+
+pub struct PromptMessage {
+  role : String
+  content : ContentItem
+}
+pub impl Eq for PromptMessage
+pub impl Show for PromptMessage
+
+pub struct PromptRegistry {
+  prompts : Array[PromptEntry]
+}
+pub async fn PromptRegistry::get_prompt(Self, String, Json?) -> Result[GetPromptResult, MCPError]
+pub fn PromptRegistry::list_prompts(Self) -> Array[Prompt]
+pub fn PromptRegistry::new() -> Self
+pub fn PromptRegistry::register(Self, String, String?, Array[PromptArgument]?, async (Json?) -> Result[GetPromptResult, MCPError]) -> Unit
+
+pub struct ResourceCapabilities {
+  subscribe : Bool
+  list_changed : Bool
+}
+pub impl Eq for ResourceCapabilities
+pub impl Show for ResourceCapabilities
+
+pub struct ServerCapabilities {
+  tools : ToolCapabilities?
+  resources : ResourceCapabilities?
+  prompts : PromptCapabilities?
+}
+pub impl Eq for ServerCapabilities
+pub impl Show for ServerCapabilities
+
+pub struct ServerInfo {
+  name : String
+  version : String
+}
+pub impl Eq for ServerInfo
+pub impl Show for ServerInfo
+
+pub struct StdioTransport {
+  mut closed : Bool
+}
+pub fn StdioTransport::close(Self) -> Unit
+pub fn StdioTransport::new() -> Self
+pub async fn StdioTransport::receive(Self) -> String? raise TransportError
+pub async fn StdioTransport::send(Self, String) -> Unit raise TransportError
+pub fn StdioTransport::send_event(Self, event_type~ : String, data~ : String) -> Unit
+pub fn StdioTransport::supports_streaming(Self) -> Bool
+pub impl Show for StdioTransport
+
+pub struct ToolCapabilities {
+  list_changed : Bool
+}
+pub impl Eq for ToolCapabilities
+pub impl Show for ToolCapabilities
+
+pub struct ToolDefinition {
+  name : String
+  description : String
+  input_schema : Json
+}
+pub impl Eq for ToolDefinition
+pub impl Show for ToolDefinition
+
+type ToolEntry
+
+pub struct ToolRegistry {
+  tools : Array[ToolEntry]
+}
+pub async fn ToolRegistry::call_tool(Self, String, Json) -> Result[ToolResult, MCPError]
+pub fn ToolRegistry::list_tools(Self) -> Array[ToolDefinition]
+pub fn ToolRegistry::new() -> Self
+pub fn ToolRegistry::register(Self, String, String, Json, async (Json) -> Result[ToolResult, MCPError]) -> Unit
+
+pub struct ToolResult {
+  content : Array[ContentItem]
+  is_error : Bool
+}
+pub fn ToolResult::error(String) -> Self
+pub fn ToolResult::success(String) -> Self
+pub impl Eq for ToolResult
+pub impl Show for ToolResult
+
+// Type aliases
+
+// Traits
+pub(open) trait Transport {
+  receive(Self) -> String? raise TransportError
+  send(Self, String) -> Unit raise TransportError
+  send_event(Self, event_type~ : String, data~ : String) -> Unit
+  supports_streaming(Self) -> Bool
+  close(Self) -> Unit
+}
+

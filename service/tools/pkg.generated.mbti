@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/moonbit_mcp/service/tools"
+
+import(
+  "colmugx/moonbit_mcp/sdk"
+)
+
+// Values
+pub async fn get_package_info_handler(Json) -> Result[@sdk.ToolResult, @sdk.MCPError]
+
+pub let get_package_info_schema : Json
+
+pub async fn get_package_structure_handler(Json) -> Result[@sdk.ToolResult, @sdk.MCPError]
+
+pub let get_package_structure_schema : Json
+
+pub async fn query_symbols_handler(Json) -> Result[@sdk.ToolResult, @sdk.MCPError]
+
+pub let query_symbols_schema : Json
+
+pub async fn search_packages_handler(Json) -> Result[@sdk.ToolResult, @sdk.MCPError]
+
+pub let search_packages_schema : Json
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+

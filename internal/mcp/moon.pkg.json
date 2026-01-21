@@ -1,0 +1,6 @@
+{
+  "import": [
+    "colmugx/moonbit_mcp/internal/json",
+    "colmugx/moonbit_mcp/internal/client"
+  ]
+}

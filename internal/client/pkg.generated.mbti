@@ -1,0 +1,69 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/moonbit_mcp/internal/client"
+
+// Values
+pub async fn fetch_module_index(String) -> ModuleIndex?
+
+pub async fn fetch_modules() -> Array[ModuleInfo]
+
+pub async fn fetch_modules_async() -> Array[ModuleInfo]
+
+pub async fn fetch_package_data(String, String) -> Array[SymbolInfo]
+
+pub async fn fetch_package_resource(String) -> PackageResource?
+
+pub fn format_module(ModuleInfo, Int) -> String
+
+pub fn format_module_index(ModuleIndex, Int) -> String
+
+pub fn format_package_resource(PackageResource) -> String
+
+pub fn format_search_results(Array[ModuleInfo]) -> String
+
+pub fn format_symbol(SymbolInfo) -> String
+
+pub async fn search_modules(String, Int) -> Array[ModuleInfo]
+
+// Errors
+
+// Types and methods
+pub struct ModuleIndex {
+  name : String
+  has_package : Bool
+  children : Array[(String, ModuleIndex)]
+}
+pub impl Show for ModuleIndex
+
+pub struct ModuleInfo {
+  name : String
+  version : String
+  description : String
+  keywords : Array[String]
+  repository : String
+}
+pub impl Show for ModuleInfo
+
+pub struct PackageResource {
+  name : String
+  author : String
+  version : String
+  license : String
+  keywords : Array[String]
+  description : String
+  repository : String
+  readme_content : String
+}
+pub impl Show for PackageResource
+
+pub struct SymbolInfo {
+  name : String
+  kind : String
+  signature : String
+  docstring : String
+}
+pub impl Show for SymbolInfo
+
+// Type aliases
+
+// Traits
+

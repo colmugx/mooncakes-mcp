@@ -1,9 +1,13 @@
 {
   "name": "colmugx/moonbit_mcp",
-  "version": "0.1.0",
-  "readme": "README.mbt.md",
+  "version": "0.2.0",
+  "deps": {
+    "moonbitlang/x": "0.4.38",
+    "moonbitlang/async": "0.16.1"
+  },
+  "readme": "README.md",
   "repository": "",
   "license": "Apache-2.0",
-  "keywords": [],
-  "description": ""
+  "keywords": ["mcp", "moonbit", "documentation"],
+  "description": "MoonBit Model Context Protocol Server"
 }

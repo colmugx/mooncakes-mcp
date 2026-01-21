@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/moonbit_mcp/internal/mcp"
+
+import(
+  "colmugx/moonbit_mcp/internal/json"
+)
+
+// Values
+pub fn handle_initialize(Int) -> String
+
+pub async fn handle_tools_call(Int, String, String) -> String
+
+pub async fn handle_tools_call_async(Int, String, String) -> String
+
+pub fn handle_tools_list(Int) -> String
+
+pub async fn route_request(@json.MCPRequest) -> String
+
+pub async fn route_request_async(@json.MCPRequest) -> String
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
+
