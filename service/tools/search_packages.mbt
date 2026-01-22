@@ -1,53 +1,57 @@
-///|
-/// Search Packages Tool implementation (async)
-pub async fn search_packages_handler(
-  params : Json,
-) -> Result[@sdk.ToolResult, @sdk.MCPError] {
-  let query = match @sdk.extract_string_from_json(params, "query") {
-    Some(q) => q
-    None => return Err(@sdk.InvalidParams("Missing 'query' parameter"))
+///| Search Packages Tool - New Tool Trait Implementation
+///| Uses the modern mcp::Tool trait API
+
+/// Search packages tool using the new Tool trait
+pub(all) struct SearchPackagesTool {}
+
+pub impl @mcp.Tool for SearchPackagesTool with name(
+  _
+) -> String {
+  "search_packages"
+}
+
+pub impl @mcp.Tool for SearchPackagesTool with description(
+  _
+) -> String {
+  "Search for MoonBit packages from mooncakes.io registry"
+}
+
+pub impl @mcp.Tool for SearchPackagesTool with params(
+  _
+) -> Array[@mcp.ParamDef] {
+  [
+    @mcp.string_param(
+      "query",
+      "Search query to filter packages",
+    ),
+    @mcp.optional_number_param(
+      "limit",
+      "Maximum number of results to return (default: 10)",
+    ),
+  ]
+}
+
+pub impl @mcp.Tool for SearchPackagesTool with execute(
+  self,
+  args : Json
+) -> @mcp.ToolResult {
+  // Extract query parameter
+  let query = match @mcp.get_string(args, "query") {
+    Ok(q) => q
+    Err(err) => return err
   }
-  let limit = @sdk.extract_int_from_json(params, "limit").unwrap_or(10)
+
+  // Extract optional limit parameter (default to 10)
+  let limit = match @mcp.get_optional_number(args, "limit") {
+    Ok(Some(n)) => n.to_int()
+    Ok(None) => 10
+    Err(_) => 10
+  }
+
+  // Call async HTTP client to search packages
   let packages = @client.search_modules(query, limit)
   let result_text = @client.format_search_results(packages)
-  Ok(@sdk.ToolResult::success(result_text))
+
+  @mcp.ToolResult::text(result_text)
 }
 
-///|
-/// Shared helper to parse JSON string back to Json type
-fn try_parse_json(s : String) -> Json {
-  @json.parse(s) catch {
-    _ => Json::null()
-  }
-}
-
-///|
-pub let search_packages_schema : Json = try_parse_json(
-  @internal_json.json_object([
-    ("type", @internal_json.json_string("object")),
-    (
-      "properties",
-      @internal_json.json_object([
-        (
-          "query",
-          @internal_json.json_object([
-            ("type", @internal_json.json_string("string")),
-            ("description", @internal_json.json_string("Search query")),
-          ]),
-        ),
-        (
-          "limit",
-          @internal_json.json_object([
-            ("type", @internal_json.json_string("integer")),
-            ("description", @internal_json.json_string("Max results")),
-            ("default", @internal_json.json_number(10)),
-          ]),
-        ),
-      ]),
-    ),
-    (
-      "required",
-      @internal_json.json_array([@internal_json.json_string("query")]),
-    ),
-  ]),
-)

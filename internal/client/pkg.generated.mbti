@@ -4,8 +4,6 @@ package "colmugx/moonbit_mcp/internal/client"
 // Values
 pub async fn fetch_module_index(String) -> ModuleIndex?
 
-pub async fn fetch_modules() -> Array[ModuleInfo]
-
 pub async fn fetch_modules_async() -> Array[ModuleInfo]
 
 pub async fn fetch_package_data(String, String) -> Array[SymbolInfo]

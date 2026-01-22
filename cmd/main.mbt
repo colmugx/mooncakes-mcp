@@ -23,31 +23,19 @@ async fn run_stdio_mode() -> Unit {
   @stdio.stderr.write("Starting MoonBit MCP Server (STDIO mode)...\n")
 
   // Create transport
-  let transport = @sdk.StdioTransport::new()
+  let transport = @transport.StdioTransport::new()
 
   // Create server
-  let server = @sdk.MCPServer::new("moonbit-docs", "0.2.0")
+  let server = @server.MCPServer::new("moonbit-docs", "0.2.0")
 
-  // Register tools
-  server.register_tool(
-    "search_packages", "Search for MoonBit packages", @tools.search_packages_schema,
-    @tools.search_packages_handler,
-  )
-  server.register_tool(
-    "get_package_info", "Get package metadata and README", @tools.get_package_info_schema,
-    @tools.get_package_info_handler,
-  )
-  server.register_tool(
-    "get_package_structure", "Get package module tree structure", @tools.get_package_structure_schema,
-    @tools.get_package_structure_handler,
-  )
-  server.register_tool(
-    "query_symbols", "Query types/values/traits in a package", @tools.query_symbols_schema,
-    @tools.query_symbols_handler,
-  )
+  // Register all tools using NEW Tool Trait API
+  server.register_trait_tool(@tools.SearchPackagesTool::{})
+  server.register_trait_tool(@tools.GetPackageInfoTool::{})
+  server.register_trait_tool(@tools.GetPackageStructureTool::{})
+  server.register_trait_tool(@tools.QuerySymbolsTool::{})
 
   // Run server
-  server.run(Stdio(transport)) catch {
+  server.run(@transport.AnyTransport::Stdio(transport)) catch {
     e => @stdio.stderr.write("Server error: " + e.to_string() + "\n")
   }
 }
@@ -57,28 +45,16 @@ async fn run_http_mode(group : @async.TaskGroup[Unit]) -> Unit {
   @stdio.stderr.write("Starting MoonBit MCP Server (HTTP mode)...\n")
 
   // Create transport
-  let transport = @sdk.HttpTransport::new(port=4240)
+  let transport = @transport.HttpTransport::new(port=4240)
 
   // Create server
-  let server = @sdk.MCPServer::new("moonbit-docs", "0.2.0")
+  let server = @server.MCPServer::new("moonbit-docs", "0.2.0")
 
-  // Register tools
-  server.register_tool(
-    "search_packages", "Search for MoonBit packages", @tools.search_packages_schema,
-    @tools.search_packages_handler,
-  )
-  server.register_tool(
-    "get_package_info", "Get package metadata and README", @tools.get_package_info_schema,
-    @tools.get_package_info_handler,
-  )
-  server.register_tool(
-    "get_package_structure", "Get package module tree structure", @tools.get_package_structure_schema,
-    @tools.get_package_structure_handler,
-  )
-  server.register_tool(
-    "query_symbols", "Query types/values/traits in a package", @tools.query_symbols_schema,
-    @tools.query_symbols_handler,
-  )
+  // Register all tools using NEW Tool Trait API
+  server.register_trait_tool(@tools.SearchPackagesTool::{})
+  server.register_trait_tool(@tools.GetPackageInfoTool::{})
+  server.register_trait_tool(@tools.GetPackageStructureTool::{})
+  server.register_trait_tool(@tools.QuerySymbolsTool::{})
 
   // Run server - spawn BOTH transport.start() and server.run() concurrently
   @stdio.stderr.write("Starting HTTP server listener...\n")
@@ -101,8 +77,8 @@ async fn run_http_mode(group : @async.TaskGroup[Unit]) -> Unit {
   @async.sleep(500)
   @stdio.stderr.write("[HTTP] Starting MCP server loop...\n")
 
-  // Run MCP server loop in foreground  
-  server.run(Http(transport)) catch {
+  // Run MCP server loop in foreground
+  server.run(@transport.AnyTransport::Http(transport)) catch {
     e => @stdio.stderr.write("[HTTP] Server error: " + e.to_string() + "\n")
   }
 }

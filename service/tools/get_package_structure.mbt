@@ -1,61 +1,52 @@
-///| get_package_structure Tool
-/// Fetches package module tree structure from mooncakes.io
+///| Get Package Structure Tool - Tool Trait Implementation
+///| Fetches package module tree structure from mooncakes.io
 
-///|
-/// Tool schema for get_package_structure
-pub let get_package_structure_schema : Json = try_parse_json(
-  @internal_json.json_object([
-    ("type", @internal_json.json_string("object")),
-    (
-      "properties",
-      @internal_json.json_object([
-        (
-          "package",
-          @internal_json.json_object([
-            ("type", @internal_json.json_string("string")),
-            (
-              "description",
-              @internal_json.json_string(
-                "Package name (e.g., 'moonbitlang/async')",
-              ),
-            ),
-          ]),
-        ),
-      ]),
-    ),
-    (
-      "required",
-      @internal_json.json_array([@internal_json.json_string("package")]),
-    ),
-  ]),
-)
+/// Get package structure tool using the new Tool trait
+pub(all) struct GetPackageStructureTool {}
 
-///|
-/// Handler for get_package_structure tool
-pub async fn get_package_structure_handler(
-  args : Json,
-) -> Result[@sdk.ToolResult, @sdk.MCPError] {
-  // Extract package name
-  let package_name = match @sdk.extract_string_from_json(args, "package") {
-    Some(s) => s
-    None => return Err(@sdk.InvalidParams("Missing 'package' parameter"))
+pub impl @mcp.Tool for GetPackageStructureTool with name(
+  _
+) -> String {
+  "get_package_structure"
+}
+
+pub impl @mcp.Tool for GetPackageStructureTool with description(
+  _
+) -> String {
+  "Get package module tree structure from mooncakes.io"
+}
+
+pub impl @mcp.Tool for GetPackageStructureTool with params(
+  _
+) -> Array[@mcp.ParamDef] {
+  [
+    @mcp.string_param(
+      "package",
+      "Package name (e.g., 'moonbitlang/async')",
+    ),
+  ]
+}
+
+pub impl @mcp.Tool for GetPackageStructureTool with execute(
+  self,
+  args : Json
+) -> @mcp.ToolResult {
+  // Extract package parameter
+  let pkg_name = match @mcp.get_string(args, "package") {
+    Ok(p) => p
+    Err(err) => return err
   }
 
-  // Fetch module index
-  match @client.fetch_module_index(package_name) {
+  // Call async HTTP client to fetch module index
+  match @client.fetch_module_index(pkg_name) {
     Some(module_index) => {
       let text = "Package Structure: " +
-        package_name +
+        pkg_name +
         "\\n" +
         "==================\\n\\n" +
         @client.format_module_index(module_index, 0)
-      Ok(@sdk.ToolResult::success(text))
+      @mcp.ToolResult::text(text)
     }
-    None =>
-      Ok(
-        @sdk.ToolResult::error(
-          "Failed to fetch package structure: " + package_name,
-        ),
-      )
+    None => @mcp.ToolResult::error("Failed to fetch package structure: " + pkg_name)
   }
 }

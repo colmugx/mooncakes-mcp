@@ -1,7 +1,7 @@
 {
   "is-main": false,
   "import": [
-    "colmugx/moonbit_mcp/sdk",
+    "colmugx/mcp",
     "colmugx/moonbit_mcp/internal/client",
     "colmugx/moonbit_mcp/internal/json"
   ]

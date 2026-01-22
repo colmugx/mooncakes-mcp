@@ -151,15 +151,9 @@ fn get_fallback_modules() -> Array[ModuleInfo] {
 }
 
 ///|
-/// Fetch all modules - async version using real HTTP
-pub async fn fetch_modules() -> Array[ModuleInfo] {
-  fetch_modules_async()
-}
-
-///|
 /// Search modules - async version
 pub async fn search_modules(query : String, limit : Int) -> Array[ModuleInfo] {
-  let all_modules = fetch_modules()
+  let all_modules = fetch_modules_async()
   search_in_modules(all_modules, query, limit)
 }
 
@@ -207,21 +201,6 @@ pub fn format_module(pkg : ModuleInfo, index : Int) -> String {
       keywords_str = keywords_str + ", " + k
     }
   }
-  index.to_string() +
-  ". " +
-  pkg.name +
-  "@" +
-  pkg.version +
-  "\n" +
-  "   Description: " +
-  pkg.description +
-  "\n" +
-  "   Keywords: " +
-  keywords_str +
-  "\n" +
-  "   URL: https://mooncakes.io/docs/" +
-  pkg.name +
-  "/\n" +
   "\{index}. \{pkg.name}@\{pkg.version}\n" +
   "   Description: \{pkg.description}\n" +
   "   Keywords: \{keywords_str}\n" +
@@ -405,17 +384,19 @@ fn parse_module_index(json : Json) -> ModuleIndex? {
       Some(String(s)) => s
       _ => ""
     }
-    let has_package = match obj.get("pkg") {
+    let has_package = match obj.get("package") {
       Some(Null) | None => false
       Some(_) => true
     }
     let children = match obj.get("childs") {
-      Some(Object(childs_obj)) => {
+      Some(Array(childs_arr)) => {
         let result = Array::new()
-        for entry in childs_obj {
-          let (child_name, child_json) = entry
+        for child_json in childs_arr {
           match parse_module_index(child_json) {
-            Some(child_module) => result.push((child_name, child_module))
+            Some(child_module) => {
+              // Use the name from the parsed module as key
+              result.push((child_module.name, child_module))
+            }
             None => continue
           }
         }
@@ -445,11 +426,13 @@ pub fn format_module_index(mod_idx : ModuleIndex, indent : Int) -> String {
 ///|
 /// Fetch package data (detailed documentation)
 /// URL: https://mooncakes.io/assets/{package}/{subpackage}/package_data.json
+/// Tries multiple URL patterns with fallback logic
 pub async fn fetch_package_data(
   package_name : String,
   subpackage : String,
 ) -> Array[SymbolInfo] {
   try {
+    // First try: with subpackage path
     let url = base_url +
       "/" +
       package_name +
@@ -457,14 +440,24 @@ pub async fn fetch_package_data(
       subpackage +
       "/package_data.json"
     let (response, body) = @http.get(url)
-    if response.code != 200 {
-      @stdio.stderr.write(
-        "HTTP error fetching package_data: " + response.code.to_string() + "\n",
-      )
-      return []
+    if response.code == 200 {
+      let json = body.json()
+      return parse_package_data(json)
     }
-    let json = body.json()
-    parse_package_data(json)
+
+    // Fallback: try without subpackage path (root package)
+    if subpackage != "" {
+      let fallback_url = base_url + "/" + package_name + "/package_data.json"
+      let (fallback_response, fallback_body) = @http.get(fallback_url)
+      if fallback_response.code == 200 {
+        let json = fallback_body.json()
+        return parse_package_data(json)
+      }
+    }
+    @stdio.stderr.write(
+      "HTTP error fetching package_data: " + response.code.to_string() + "\n",
+    )
+    []
   } catch {
     err => {
       @stdio.stderr.write(
