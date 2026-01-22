@@ -7,6 +7,6 @@
     "colmugx/mcp/types",
     "colmugx/mcp/transport",
     "colmugx/mcp/server",
-    "colmugx/moonbit_mcp/service/tools"
+    "colmugx/mooncakes_mcp/service/tools"
   ]
 }

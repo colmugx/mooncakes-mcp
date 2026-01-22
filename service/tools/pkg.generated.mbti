@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "colmugx/moonbit_mcp/service/tools"
+package "colmugx/mooncakes_mcp/service/tools"
 
 import(
   "colmugx/mcp"

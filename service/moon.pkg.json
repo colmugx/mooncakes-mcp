@@ -1,8 +1,1 @@
-{
-  "is-main": false,
-  "import": [
-    "colmugx/mcp",
-    "colmugx/moonbit_mcp/internal/client",
-    "colmugx/moonbit_mcp/internal/json"
-  ]
-}
+{}

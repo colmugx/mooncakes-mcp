@@ -1,0 +1,139 @@
+name: Release Build
+
+permissions:
+  contents: write
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: ./.github/actions/setup-moonbit
+
+      - name: Build Binary
+        run: |
+          moon update
+          moon build --target native
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p dist
+          cp _build/native/release/build/cmd/cmd.exe dist/mooncakes_mcp
+
+      - name: Upload artifacts
+        env:
+          ARCH: ${{ runner.arch }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mooncakes_mcp-macos-${{ env.ARCH }}
+          path: dist/*
+
+  build-linux:
+    name: Build Linux
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build-essential
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential
+
+      - name: Setup MoonBit
+        uses: ./.github/actions/setup-moonbit
+
+      - name: Build Binary
+        run: |
+          moon update
+          moon build --target native
+
+      - name: Prepare artifacts
+        run: |
+          mkdir -p dist
+          cp _build/native/release/build/cmd/cmd.exe dist/mooncakes_mcp
+
+      - name: Upload artifacts
+        env:
+          ARCH: ${{ runner.arch }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mooncakes_mcp-linux-${{ env.ARCH }}
+          path: dist/*
+
+  build-windows:
+    name: Build Windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup MoonBit
+        uses: ./.github/actions/setup-moonbit
+
+      - name: Build Binary
+        run: |
+          moon update
+          moon build --target native
+
+      - name: Prepare artifacts
+        run: |
+          mkdir dist
+          Copy-Item _build\native\release\build\cmd\cmd.exe dist\mooncakes_mcp.exe
+
+      - name: Upload artifacts
+        env:
+          ARCH: ${{ runner.arch }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: mooncakes_mcp-windows-${{ env.ARCH }}
+          path: dist/*
+
+  release:
+    name: Create Release
+    needs: [build-macos, build-linux, build-windows]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List downloaded files
+        run: ls -R artifacts
+
+      - name: Zip macOS artifact
+        run: |
+          cd artifacts
+          for d in mooncakes_mcp-macos-*; do
+            zip -j "${d}.zip" "$d/mooncakes_mcp"
+          done
+
+      - name: Zip linux artifact
+        run: |
+          cd artifacts
+          for d in mooncakes_mcp-linux-*; do
+            zip -j "${d}.zip" "$d/mooncakes_mcp"
+          done
+
+      - name: Zip windows artifact
+        run: |
+          cd artifacts
+          for d in mooncakes_mcp-windows-*; do
+            zip -j "${d}.zip" "$d/mooncakes_mcp.exe"
+          done
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            artifacts/mooncakes_mcp-macos-*.zip
+            artifacts/mooncakes_mcp-linux-*.zip
+            artifacts/mooncakes_mcp-windows-*.zip
+          generate_release_notes: true

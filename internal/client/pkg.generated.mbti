@@ -1,5 +1,5 @@
 // Generated using `moon info`, DON'T EDIT IT
-package "colmugx/moonbit_mcp/internal/client"
+package "colmugx/mooncakes_mcp/internal/client"
 
 // Values
 pub async fn fetch_module_index(String) -> ModuleIndex?

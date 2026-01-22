@@ -1,12 +1,6 @@
 {
-  "is-main": false,
   "import": [
     "colmugx/mcp",
-    "colmugx/mcp/types",
-    "colmugx/moonbit_mcp/internal/client",
-    {
-      "path": "colmugx/moonbit_mcp/internal/json",
-      "alias": "internal_json"
-    }
+    "colmugx/mooncakes_mcp/internal/client"
   ]
 }

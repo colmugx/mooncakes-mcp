@@ -11,17 +11,43 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server that e
 
 ## Installation
 
-### Prerequisites
+### Option 1: Build from Source (requires MoonBit CLI)
 
-- [MoonBit CLI](https://www.moonbitlang.com/download)
-- Build the project:
-  ```bash
-  moon build --target native
-  ```
+1. Install [MoonBit CLI](https://www.moonbitlang.com/download)
+2. Clone and build:
+   ```bash
+   git clone https://github.com/colmugx/mooncakes_mcp.git
+   cd mooncakes_mcp
+   moon build --target native
+   ```
 
 The built binary will be at `_build/native/release/build/cmd/cmd.exe`
 
+**Run using `moon run`:**
+```bash
+moon run --target native cmd
+```
+
+### Option 2: Download Pre-built Binary (Recommended)
+
+Download the latest release from the [GitHub Releases page](https://github.com/colmugx/mooncakes_mcp/releases).
+
+Choose the appropriate file for your platform:
+- **macOS**: `mooncakes_mcp-macos-{ARCH}.zip`
+- **Linux**: `mooncakes_mcp-linux-{ARCH}.zip`
+- **Windows**: `mooncakes_mcp-windows-{ARCH}.zip`
+
+Extract and make executable:
+```bash
+unzip mooncakes_mcp-macos-*.zip
+chmod +x mooncakes_mcp
+```
+
+The binary is ready to run directly - no MoonBit CLI required.
+
 ## Configuration
+
+> **Note**: These examples assume you've downloaded the binary to `~/Downloads`. Adjust the path if you placed it elsewhere. Replace `your-username` with your actual username.
 
 ### Claude Desktop
 
@@ -29,20 +55,7 @@ The built binary will be at `_build/native/release/build/cmd/cmd.exe`
 {
   "mcpServers": {
     "mooncakes": {
-      "command": "/path/to/_build/native/release/build/cmd/cmd.exe"
-    }
-  }
-}
-```
-
-**Using `moon run` directly (requires MoonBit CLI in PATH):**
-
-```json
-{
-  "mcpServers": {
-    "mooncakes": {
-      "command": "moon",
-      "args": ["run", "--target", "native", "/path/to/_build/native/release/build/cmd/cmd.exe"]
+      "command": "/Users/your-username/Downloads/mooncakes_mcp"
     }
   }
 }
@@ -56,23 +69,23 @@ Add to your Cursor settings (Settings > MCP):
 {
   "mcpServers": {
     "mooncakes": {
-      "command": "/path/to/_build/native/release/build/cmd/cmd.exe"
+      "command": "/Users/your-username/Downloads/mooncakes_mcp"
     }
   }
 }
 ```
 
-Or open Settings → MCP Servers → Add Server and use the command path.
+Or open **Settings → MCP Servers → Add Server** and use the command path.
 
 ### Claude Code (VS Code Extension)
 
-Add to your MCP configuration:
+Add to your MCP configuration file:
 
 ```json
 {
   "mcpServers": {
     "mooncakes": {
-      "command": "/path/to/_build/native/release/build/cmd/cmd.exe"
+      "command": "/Users/your-username/Downloads/mooncakes_mcp"
     }
   }
 }
@@ -84,10 +97,10 @@ The server can also run in HTTP mode with SSE (Server-Sent Events) streaming:
 
 **Start the HTTP server:**
 ```bash
-/path/to/_build/native/release/build/cmd/cmd.exe server
+~/Downloads/mooncakes_mcp server
 ```
 
-Or using `moon run`:
+**Or using `moon run` (if built from source):**
 ```bash
 moon run --target native cmd -- server
 ```
