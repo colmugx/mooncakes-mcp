@@ -69,13 +69,24 @@ jobs:
           path: dist/*
 
   build-windows:
-    name: Build Windows
+    name: Build Windows (MSVC)
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Setup MoonBit
         uses: ./.github/actions/setup-moonbit
+
+      - name: Configure MSVC compiler
+        run: |
+          $json = Get-Content cmd/moon.pkg.json -Raw | ConvertFrom-Json
+          if (-not $json.link) { $json.link = @{} }
+          if (-not $json.link.native) { $json.link.native = @{} }
+          $json.link.native.cc = "cl"
+          $json | ConvertTo-Json -Depth 10 | Set-Content cmd/moon.pkg.json
 
       - name: Build Binary
         run: |
