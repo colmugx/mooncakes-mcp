@@ -35,7 +35,6 @@ Download the latest release from the [GitHub Releases page](https://github.com/c
 Choose the appropriate file for your platform:
 - **macOS**: `mooncakes_mcp-macos-{ARCH}.zip`
 - **Linux**: `mooncakes_mcp-linux-{ARCH}.zip`
-- **Windows**: `mooncakes_mcp-windows-{ARCH}.zip`
 
 Extract and make executable:
 ```bash
