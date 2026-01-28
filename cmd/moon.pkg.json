@@ -2,11 +2,10 @@
   "is-main": true,
   "import": [
     "moonbitlang/async",
-    "moonbitlang/async/stdio",
     "moonbitlang/x/sys",
-    "colmugx/mcp/types",
-    "colmugx/mcp/transport",
-    "colmugx/mcp/server",
-    "colmugx/mooncakes_mcp/service/tools"
+    "moonbitlang/async/stdio",
+    "colmugx/mcp",
+    "colmugx/mooncakes_mcp/internal/cache",
+    "colmugx/mooncakes_mcp/internal/service/tools"
   ]
 }

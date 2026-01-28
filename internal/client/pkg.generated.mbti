@@ -2,6 +2,22 @@
 package "colmugx/mooncakes_mcp/internal/client"
 
 // Values
+pub fn calculate_score(ModuleInfo, String) -> Int
+
+pub let categories : Array[Category]
+
+pub fn classify_package(ModuleInfo) -> String?
+
+pub fn count_leading_spaces(String) -> Int
+
+pub fn detect_platforms(String) -> Array[String]
+
+pub fn enhanced_search(Array[ModuleInfo], String, Int) -> SearchResults
+
+pub fn extract_section(String, Array[String]) -> String
+
+pub fn extract_section_array(String, Array[String]) -> Array[String]
+
 pub async fn fetch_module_index(String) -> ModuleIndex?
 
 pub async fn fetch_modules_async() -> Array[ModuleInfo]
@@ -9,6 +25,8 @@ pub async fn fetch_modules_async() -> Array[ModuleInfo]
 pub async fn fetch_package_data(String, String) -> Array[SymbolInfo]
 
 pub async fn fetch_package_resource(String) -> PackageResource?
+
+pub fn find_similar_packages(Array[ModuleInfo], String, Int) -> Array[String]
 
 pub fn format_module(ModuleInfo, Int) -> String
 
@@ -20,11 +38,53 @@ pub fn format_search_results(Array[ModuleInfo]) -> String
 
 pub fn format_symbol(SymbolInfo) -> String
 
+pub fn get_all_categories() -> Array[String]
+
+pub fn get_search_suggestions(String) -> Array[String]
+
+pub fn list_by_category(String, Array[ModuleInfo]) -> Array[ModuleInfo]
+
+pub fn parse_module_from_json(Json) -> ModuleInfo?
+
+pub fn parse_module_index(Json) -> ModuleIndex?
+
+pub fn parse_package_resource(Json, String) -> PackageResource?
+
+pub fn parse_readme(String) -> ParsedReadme
+
+pub fn parse_symbol(Json, String, String) -> SymbolInfo?
+
 pub async fn search_modules(String, Int) -> Array[ModuleInfo]
 
 // Errors
 
 // Types and methods
+pub struct Cache[K, V] {
+  map : Map[K, CacheEntry[V]]
+  time_source : &TimeSource
+}
+pub fn[K, V] Cache::clear(Self[K, V]) -> Unit
+pub fn[K : Hash + Eq, V] Cache::get(Self[K, V], K) -> V?
+pub fn[K, V] Cache::new(&TimeSource) -> Self[K, V]
+pub fn[K : Hash + Eq, V] Cache::set(Self[K, V], K, V, Int) -> Unit
+
+pub struct CacheEntry[V] {
+  value : V
+  expires_at : Int64
+}
+
+pub struct Category {
+  name : String
+  keywords : Array[String]
+}
+
+pub struct MockTimeSource {
+  mut current_time : Int64
+}
+pub fn MockTimeSource::new(Int64) -> Self
+pub fn MockTimeSource::set_time(Self, Int64) -> Unit
+pub impl TimeSource for MockTimeSource
+
 pub struct ModuleIndex {
   name : String
   has_package : Bool
@@ -50,18 +110,54 @@ pub struct PackageResource {
   description : String
   repository : String
   readme_content : String
+  platforms : Array[String]
+  features : Array[String]
+  installation : String
+  usage : String
 }
 pub impl Show for PackageResource
+
+pub(all) struct ParsedReadme {
+  features : Array[String]
+  installation : String
+  usage : String
+  api_reference : String
+  examples : String
+}
+
+pub struct RealTimeSource {
+}
+pub impl TimeSource for RealTimeSource
+
+pub(all) struct ScoredResult {
+  pkg : ModuleInfo
+  score : Int
+}
+
+pub(all) struct SearchResults {
+  query : String
+  exact : Bool
+  count : Int
+  results : Array[ModuleInfo]
+  suggestions : Array[String]
+}
 
 pub struct SymbolInfo {
   name : String
   kind : String
   signature : String
   docstring : String
+  is_exported : Bool
+  is_deprecated : Bool
+  is_async : Bool
+  module : String
 }
 pub impl Show for SymbolInfo
 
 // Type aliases
 
 // Traits
+pub trait TimeSource {
+  now(Self) -> Int64
+}
 

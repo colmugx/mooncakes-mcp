@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/mooncakes_mcp/internal/error"
+
+// Values
+pub fn api_error(String, String) -> ToolError
+
+pub fn generic_error(ErrorType, String, String) -> ToolError
+
+pub fn network_error(String) -> ToolError
+
+pub fn package_not_found(String, Array[String]) -> ToolError
+
+pub fn parse_error(String, String) -> ToolError
+
+// Errors
+
+// Types and methods
+pub(all) enum ErrorType {
+  PackageNotFound
+  NetworkError
+  APIError
+  ParseError
+}
+
+pub(all) struct ToolError {
+  code : ErrorType
+  message : String
+  suggested_action : String
+  similar_packages : Array[String]
+}
+
+// Type aliases
+
+// Traits
+

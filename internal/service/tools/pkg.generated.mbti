@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "colmugx/mooncakes_mcp/internal/service/tools"
+
+import(
+  "colmugx/mcp/tool"
+)
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) struct ClearCacheTool {
+}
+pub impl @tool.Tool for ClearCacheTool
+
+pub(all) struct GetPackageInfoTool {
+}
+pub impl @tool.Tool for GetPackageInfoTool
+
+pub(all) struct GetPackageStructureTool {
+}
+pub impl @tool.Tool for GetPackageStructureTool
+
+pub(all) struct ListCategoriesTool {
+}
+pub impl @tool.Tool for ListCategoriesTool
+
+pub(all) struct QuerySymbolsTool {
+}
+pub impl @tool.Tool for QuerySymbolsTool
+
+pub(all) struct SearchPackagesTool {
+}
+pub impl @tool.Tool for SearchPackagesTool
+
+// Type aliases
+
+// Traits
+

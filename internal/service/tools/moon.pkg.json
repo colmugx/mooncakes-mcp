@@ -1,0 +1,8 @@
+{
+  "import": [
+    "colmugx/mcp",
+    "colmugx/mooncakes_mcp/internal/client",
+    "colmugx/mooncakes_mcp/internal/cache",
+    "colmugx/mooncakes_mcp/internal/error"
+  ]
+}

@@ -12,7 +12,7 @@ pub struct ModuleInfo {
 } derive(Show)
 
 ///|
-/// Package resource information
+/// Enhanced package resource information
 pub struct PackageResource {
   name : String
   author : String
@@ -22,6 +22,11 @@ pub struct PackageResource {
   description : String
   repository : String
   readme_content : String
+  // Enhanced fields
+  platforms : Array[String]
+  features : Array[String]
+  installation : String
+  usage : String
 } derive(Show)
 
 ///|
@@ -33,55 +38,22 @@ pub struct ModuleIndex {
 } derive(Show)
 
 ///|
-/// Simple type/value/trait info from package_data.json
+/// Enhanced symbol info from package_data.json
 pub struct SymbolInfo {
   name : String
   kind : String // "type", "value", "trait", "typealias"
   signature : String
   docstring : String
+  // Enhanced fields
+  is_exported : Bool
+  is_deprecated : Bool
+  is_async : Bool
+  module : String
 } derive(Show)
 
 ///|
 /// Base URL for mooncakes.io API  
 let base_url : String = "https://mooncakes.io/assets"
-
-///|
-/// Parse ModuleInfo from JSON
-fn parse_module_from_json(json : Json) -> ModuleInfo? {
-  if json is Object(obj) {
-    let name = match obj.get("name") {
-      Some(String(s)) => s
-      _ => return None
-    }
-    let version = match obj.get("version") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    let description = match obj.get("description") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    let repository = match obj.get("repository") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    let keywords = match obj.get("keywords") {
-      Some(Array(arr)) => {
-        let result = Array::new()
-        for item in arr {
-          if item is String(s) {
-            result.push(s)
-          }
-        }
-        result
-      }
-      _ => []
-    }
-    Some({ name, version, description, keywords, repository })
-  } else {
-    None
-  }
-}
 
 ///|
 /// Fetch all modules from mooncakes.io using real HTTP
@@ -151,41 +123,11 @@ fn get_fallback_modules() -> Array[ModuleInfo] {
 }
 
 ///|
-/// Search modules - async version
+/// Search modules - async version (uses enhanced search)
 pub async fn search_modules(query : String, limit : Int) -> Array[ModuleInfo] {
   let all_modules = fetch_modules_async()
-  search_in_modules(all_modules, query, limit)
-}
-
-///|
-/// Internal search logic
-fn search_in_modules(
-  all_modules : Array[ModuleInfo],
-  query : String,
-  limit : Int,
-) -> Array[ModuleInfo] {
-  let matches = Array::new()
-  let mut count = 0
-  let query_lower = query.to_lower()
-  for pkg in all_modules {
-    if count >= limit {
-      break
-    }
-    let name_match = pkg.name.to_lower().contains(query_lower)
-    let desc_match = pkg.description.to_lower().contains(query_lower)
-    let mut keyword_match = false
-    for k in pkg.keywords {
-      if k.to_lower().contains(query_lower) {
-        keyword_match = true
-        break
-      }
-    }
-    if name_match || desc_match || keyword_match {
-      matches.push(pkg)
-      count = count + 1
-    }
-  }
-  matches
+  let results = enhanced_search(all_modules, query, limit)
+  results.results
 }
 
 ///|
@@ -201,14 +143,27 @@ pub fn format_module(pkg : ModuleInfo, index : Int) -> String {
       keywords_str = keywords_str + ", " + k
     }
   }
-  "\{index}. \{pkg.name}@\{pkg.version}\n" +
-  "   Description: \{pkg.description}\n" +
-  "   Keywords: \{keywords_str}\n" +
-  "   URL: https://mooncakes.io/docs/\{pkg.name}/\n"
+
+  // Use concatenation to avoid interpolation issues
+  index.to_string() +
+  ". " +
+  pkg.name +
+  "@" +
+  pkg.version +
+  "\n" +
+  "   Description: " +
+  pkg.description +
+  "\n" +
+  "   Keywords: " +
+  keywords_str +
+  "\n" +
+  "   URL: https://mooncakes.io/docs/" +
+  pkg.name +
+  "/\n"
 }
 
 ///|
-/// Format search results
+/// Format search results (enhanced)
 pub fn format_search_results(packages : Array[ModuleInfo]) -> String {
   if packages.length() == 0 {
     "No packages found."
@@ -229,7 +184,7 @@ pub fn format_search_results(packages : Array[ModuleInfo]) -> String {
 }
 
 ///|
-/// Fetch package resource (metadata + README)
+/// Fetch package resource (metadata + README) - Enhanced
 pub async fn fetch_package_resource(package_name : String) -> PackageResource? {
   try {
     // Format: https://mooncakes.io/assets/{author}/{package}/resource.json
@@ -287,6 +242,10 @@ pub async fn fetch_package_resource(package_name : String) -> PackageResource? {
             Some(String(s)) => s
             _ => ""
           }
+
+          // Parse enhanced information from README
+          let parsed_readme = parse_readme(readme_content)
+          let platforms = detect_platforms(readme_content)
           Some({
             name,
             author,
@@ -296,6 +255,10 @@ pub async fn fetch_package_resource(package_name : String) -> PackageResource? {
             repository,
             keywords,
             readme_content,
+            platforms,
+            features: parsed_readme.features,
+            installation: parsed_readme.installation,
+            usage: parsed_readme.usage,
           })
         }
         _ => None
@@ -315,7 +278,7 @@ pub async fn fetch_package_resource(package_name : String) -> PackageResource? {
 }
 
 ///|
-/// Format package resource for display
+/// Format package resource for display (enhanced)
 pub fn format_package_resource(resource : PackageResource) -> String {
   let mut keywords_str = ""
   let mut first = true
@@ -325,6 +288,26 @@ pub fn format_package_resource(resource : PackageResource) -> String {
       first = false
     } else {
       keywords_str = keywords_str + ", " + k
+    }
+  }
+  let mut features_str = ""
+  let mut ffirst = true
+  for f in resource.features {
+    if ffirst {
+      features_str = "- " + f
+      ffirst = false
+    } else {
+      features_str = features_str + "\n- " + f
+    }
+  }
+  let mut platforms_str = ""
+  let mut pfirst = true
+  for p in resource.platforms {
+    if pfirst {
+      platforms_str = p
+      pfirst = false
+    } else {
+      platforms_str = platforms_str + ", " + p
     }
   }
   "Package: " +
@@ -344,8 +327,14 @@ pub fn format_package_resource(resource : PackageResource) -> String {
   "Keywords: " +
   keywords_str +
   "\\n" +
+  "Platforms: " +
+  platforms_str +
+  "\\n" +
   "Repository: " +
   resource.repository +
+  "\\n\\n" +
+  "Features:\\n" +
+  features_str +
   "\\n\\n" +
   "README:\\n" +
   "-------\\n" +
@@ -377,40 +366,6 @@ pub async fn fetch_module_index(package_name : String) -> ModuleIndex? {
 }
 
 ///|
-/// Parse ModuleIndex from JSON
-fn parse_module_index(json : Json) -> ModuleIndex? {
-  if json is Object(obj) {
-    let name = match obj.get("name") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    let has_package = match obj.get("package") {
-      Some(Null) | None => false
-      Some(_) => true
-    }
-    let children = match obj.get("childs") {
-      Some(Array(childs_arr)) => {
-        let result = Array::new()
-        for child_json in childs_arr {
-          match parse_module_index(child_json) {
-            Some(child_module) => {
-              // Use the name from the parsed module as key
-              result.push((child_module.name, child_module))
-            }
-            None => continue
-          }
-        }
-        result
-      }
-      _ => []
-    }
-    Some({ name, has_package, children })
-  } else {
-    None
-  }
-}
-
-///|
 /// Format module index tree for display
 pub fn format_module_index(mod_idx : ModuleIndex, indent : Int) -> String {
   let prefix = "  ".repeat(indent)
@@ -424,7 +379,7 @@ pub fn format_module_index(mod_idx : ModuleIndex, indent : Int) -> String {
 }
 
 ///|
-/// Fetch package data (detailed documentation)
+/// Fetch package data (detailed documentation) - Enhanced
 /// URL: https://mooncakes.io/assets/{package}/{subpackage}/package_data.json
 /// Tries multiple URL patterns with fallback logic
 pub async fn fetch_package_data(
@@ -442,7 +397,7 @@ pub async fn fetch_package_data(
     let (response, body) = @http.get(url)
     if response.code == 200 {
       let json = body.json()
-      return parse_package_data(json)
+      return parse_package_data(json, package_name + "/" + subpackage)
     }
 
     // Fallback: try without subpackage path (root package)
@@ -451,7 +406,7 @@ pub async fn fetch_package_data(
       let (fallback_response, fallback_body) = @http.get(fallback_url)
       if fallback_response.code == 200 {
         let json = fallback_body.json()
-        return parse_package_data(json)
+        return parse_package_data(json, package_name)
       }
     }
     @stdio.stderr.write(
@@ -469,90 +424,21 @@ pub async fn fetch_package_data(
 }
 
 ///|
-/// Parse package_data.json and extract symbols
-fn parse_package_data(json : Json) -> Array[SymbolInfo] {
-  let symbols = Array::new()
-  if json is Object(obj) {
-    // Parse types
-    match obj.get("types") {
-      Some(Array(types)) =>
-        for type_json in types {
-          match parse_symbol(type_json, "type") {
-            Some(sym) => symbols.push(sym)
-            None => continue
-          }
-        }
-      _ => ()
-    }
-
-    // Parse values
-    match obj.get("values") {
-      Some(Array(values)) =>
-        for value_json in values {
-          match parse_symbol(value_json, "value") {
-            Some(sym) => symbols.push(sym)
-            None => continue
-          }
-        }
-      _ => ()
-    }
-
-    // Parse traits
-    match obj.get("traits") {
-      Some(Array(traits)) =>
-        for trait_json in traits {
-          match parse_symbol(trait_json, "trait") {
-            Some(sym) => symbols.push(sym)
-            None => continue
-          }
-        }
-      _ => ()
-    }
-
-    // Parse typealias
-    match obj.get("typealias") {
-      Some(Array(aliases)) =>
-        for alias_json in aliases {
-          match parse_symbol(alias_json, "typealias") {
-            Some(sym) => symbols.push(sym)
-            None => continue
-          }
-        }
-      _ => ()
-    }
-  }
-  symbols
-}
-
-///|
-/// Parse a single symbol from JSON
-fn parse_symbol(json : Json, kind : String) -> SymbolInfo? {
-  if json is Object(obj) {
-    let name = match obj.get("name") {
-      Some(String(s)) => s
-      _ => return None
-    }
-    let signature = match obj.get("signature") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    let docstring = match obj.get("docstring") {
-      Some(String(s)) => s
-      _ => ""
-    }
-    Some({ name, kind, signature, docstring })
-  } else {
-    None
-  }
-}
-
-///|
-///\n/// Format symbol info for display
+/// Format symbol info for display (enhanced)
 pub fn format_symbol(sym : SymbolInfo) -> String {
+  let deprecated_marker = if sym.is_deprecated { " [DEPRECATED]" } else { "" }
+  let async_marker = if sym.is_async { " [async]" } else { "" }
+
+  // Use concatenation to avoid interpolation issues
   "[" +
   sym.kind +
+  deprecated_marker +
+  async_marker +
   "] " +
   sym.name +
+  "\\n" +
+  "  Module: " +
+  sym.module +
   "\\n" +
   "  Signature: " +
   sym.signature +
