@@ -310,35 +310,22 @@ pub fn format_package_resource(resource : PackageResource) -> String {
       platforms_str = platforms_str + ", " + p
     }
   }
-  "Package: " +
-  resource.name +
-  "@" +
-  resource.version +
-  "\\n" +
-  "Author: " +
-  resource.author +
-  "\\n" +
-  "License: " +
-  resource.license +
-  "\\n" +
-  "Description: " +
-  resource.description +
-  "\\n" +
-  "Keywords: " +
-  keywords_str +
-  "\\n" +
-  "Platforms: " +
-  platforms_str +
-  "\\n" +
-  "Repository: " +
-  resource.repository +
-  "\\n\\n" +
-  "Features:\\n" +
-  features_str +
-  "\\n\\n" +
-  "README:\\n" +
-  "-------\\n" +
-  resource.readme_content
+  (
+    $|Package: \{resource.name}@\{resource.version}
+    #|Author: \{resource.author}
+    #|License: \{resource.license}
+    #|Description: \{resource.description}
+    #|Keywords: \{keywords_str}
+    #|Platforms: \{platforms_str}
+    #|Repository: \{resource.repository}
+    #|
+    #|Features:
+    #|\{features_str}
+    #|
+    #|README:
+    #|-------
+    #|\{resource.readme_content}
+  )
 }
 
 ///|

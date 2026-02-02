@@ -85,13 +85,17 @@ pub impl @mcp.Tool for SearchPackagesTool with execute(self, args : Json) -> @mc
     result = result + "Results:\n"
     result = result + @client.format_search_results(search_results)
   } else {
-    result = result + "No results found.\n\n"
-    result = result + "Try these keywords:\n"
-    result = result + "  - json, http, time, crypto, encoding\n"
-    result = result + "  - cli, testing, logging, math, format\n"
-    result = result + "  - image, audio, compression\n"
     result = result +
-      "\nOr use list_categories to browse packages by category\n"
+      (
+        #|No results found.
+        #|
+        #|Try these keywords:
+        #|  - json, http, time, crypto, encoding
+        #|  - cli, testing, logging, math, format
+        #|  - image, audio, compression
+        #|
+        #|Or use list_categories to browse packages by category
+      )
   }
   @mcp.ToolResult::text(result)
 }

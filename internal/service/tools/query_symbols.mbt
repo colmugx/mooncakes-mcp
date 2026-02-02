@@ -91,7 +91,14 @@ pub impl @mcp.Tool for QuerySymbolsTool with execute(self, args : Json) -> @mcp.
   // Format results (enhanced)
   if filtered.length() == 0 {
     @mcp.ToolResult::text(
-      "No symbols found matching the criteria.\n\nTry:\n- Using a broader query\n- Checking different subpackages\n- Looking for symbols in parent modules",
+      (
+        #|No symbols found matching the criteria.
+        #|
+        #|Try:
+        #|- Using a broader query
+        #|- Checking different subpackages
+        #|- Looking for symbols in parent modules
+      ),
     )
   } else {
     let mut result = "Found " +
